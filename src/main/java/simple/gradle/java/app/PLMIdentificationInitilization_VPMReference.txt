@@ -1,0 +1,434 @@
+/* ustomization of the ENONT_VPMReference_BLInitialization OOTB CATRule */
+
+/* Input Parameters:
+	ThisObject 	VPMReference
+	Parameters	RuleContext
+*/
+
+/* ------------------------------------------------------------------------------------------------ */
+/* OOTB Comment and variables declaration     */
+/* ------------------------------------------------------------------------------------------------ */
+
+/* Rule ENONT_VPMReference_BLInitialization (ThisObject: PLMReference, Parameters: RuleContext)       */
+/* NOT CONTRACTUAL and PROPERTY OF TE (TEAM ENVIRONMENT) DEFINITION, ANY CHANGE MAY HAPPEN WITHOUT NOTICE         */
+/* Parameters contains many information such as name, user, security ... depending on Operation                   */
+/* Notice this BL operates for Several OpeningID and Many OperationId (New, Cloning, ImportAsNew, ...)            */
+/* PLMIdentificationInitialization,PLMTemplateCloning,PLMImportExportAttributesValuation,ComponentsFamilyNaming   */
+/* Notice this BL sometimes operates only for updating an existing object,mentioned IsCreatingNewObject==false    */
+
+Let IsCreatingNewObject (Boolean)
+Let UserPrefix(String)
+Let Inc(Integer)
+
+Let CopyFromObject(PLMEntity)
+/*Let CopyFromObject(PLMReference)*/
+
+Let ProjectUsage (STRING)
+Let VNameWas(STRING)
+Let ItemName (String)
+Let IsRootFamilyItem (Boolean)
+Let NativeV5PropFeat(Feature)
+
+Let ModelingType(Type)
+Let ModelingTypeName(String)
+Let AbbreviatedBaseTypeName(String)
+Let Separator(String) 
+
+/************
+ temporary definition for hardcoded test on VPMReference with TBD new V2 naming principle below
+ ***********/ 
+Let VUsage(String)
+Let MyNamingCustomFileName(String)
+Let MyNamingBaseFileName(String) 
+/* end of temporary definition */ 
+
+Let TypeTitle(STRING)
+Let TypePackage(STRING)
+Let NamingTypePrefix(STRING)
+Let SiteAffix(STRING)
+Let NamingTypeSuffix(STRING)
+
+Let VName(STRING)
+Let ID(STRING)
+Let Description(STRING)
+Let DescriptionSize(INTEGER)
+Let IDNumber(STRING)
+Let IDVNumber(STRING)
+Let IDType(STRING)
+Let NumberAlignment(INTEGER)
+
+
+let yInt(Integer)
+let ylength(Integer)
+let startIndex(Integer)
+let endIndex(Integer)
+let ExtVName(String)
+Let NameSize(INTEGER) 
+let bSuffix(Boolean)
+let UserSuffix(String)
+let sFirstChar, sAllowedDigit, sSecondChar(String)
+let iLength(Integer)
+
+/* ------------------------------------------------------------------------------------------------ */
+/* ------------------------------------------------------------------------------------------------ */
+Trace(1, "==> Attributes Initialization -  VPMReference")
+
+/* ------------------------------------------------------------------------------------------------ */
+/* OOTB Code     */
+/* ------------------------------------------------------------------------------------------------ */
+
+/* in case of Cloning of this rule  following constant must be defined */
+NumberAlignment=8
+AbbreviatedBaseTypeName="PLMCoreReference" 
+Separator="-"
+SiteAffix=""
+
+         /* variable set-up */ 
+
+/*standard case of this BL is creation of new object*/
+IsCreatingNewObject=true
+
+Description = ""
+UserPrefix = ""
+Inc = 0
+NameSize = 0
+ProjectUsage = ""
+
+CopyFromObject=NULL
+         /* checking Rule calling context  */ 
+
+if ((ThisObject->IsSupporting("VPMReference") == false) and (ThisObject->IsSupporting("VPMRepReference") == false) ){
+    Trace (1, "ENONT_PLMReference_BLInitialization: ERROR, Called on an Invalid Object type"  )    
+    Parameters.Message="wrong usage of rule ENONT_VPMReference_BLInitialization"
+    Parameters.Severity=3 
+	Report("Error",Parameters.Message, Parameters.Message)     
+} else {
+    if (Parameters->HasAttribute("OperationId") == true) {
+      Trace (1, "ENONT_PLMReference_BLInitialization, Operation: ", Parameters->GetAttributeString("OperationId")   )
+    }      
+    if (Parameters->HasAttribute("OperationDetail") == true) {
+      Trace (1, "ENONT_PLMReference_BLInitialization, OperationDetails: ", Parameters->GetAttributeString("OperationDetail")   )
+    }  
+
+    Parameters.Severity=0 
+}
+
+/* TBD: testing operation applicable to this rule */
+     
+          /* getting information from RuleContext parameters  */ 
+
+if ( Parameters->HasAttribute("FirstImport") == true ) {  /* BriefcaseImport or FBDIImport */
+  /*synchronization operation only (update) for ThisObject, =>no creation*/
+  IsCreatingNewObject= Parameters.GetAttributeBoolean("FirstImport")
+} 
+
+if ( Parameters->HasAttribute("Project") == true ) {
+   ProjectUsage=Parameters->GetAttributeString("Project")
+}
+
+if ( Parameters->HasAttribute("IdCloningString") == true ) { /* Cloning/SaveAsNew */
+    UserPrefix = Parameters->GetAttributeString("IdCloningString")
+    if (UserPrefix == NULL) UserPrefix = ""
+}
+if ( UserPrefix == "" and Parameters->HasAttribute("IdString") == true ) {
+    UserPrefix = Parameters->GetAttributeString("IdString")
+    if (UserPrefix == NULL) UserPrefix = ""
+}
+
+if (IsCreatingNewObject == false) {
+  /*prefix are considered only at creation time*/ 
+  UserPrefix=""
+}
+
+if ( Parameters->HasAttribute("CopyFrom") == true ) {  /* Cloning/SaveAsNew */
+     set CopyFromObject=Parameters->GetAttributeObject("CopyFrom") 
+}
+
+if ( Parameters->HasAttribute("GenericModel") == true ) {  /* ComponentsFamilyNaming */
+     set CopyFromObject=Parameters->GetAttributeObject("GenericModel")    
+}                                                            
+
+if ( Parameters->HasAttribute("IncSessionId") == true ) {
+  Inc=Parameters->GetAttributeInteger("IncSessionId")
+}
+
+IsRootFamilyItem = false
+if ( Parameters->HasAttribute("IsRoot") == true ) {  /* ComponentsFamilyNaming */
+  IsRootFamilyItem = Parameters.GetAttributeBoolean("IsRoot")
+  UserPrefix=""   /*user prefix must not be preprended to any items*/
+} 
+           /* Getting Information from current object*/ 
+
+/* PrimaryType is the custom type of a DS Modeling type */
+ModelingType = ThisObject.ModelerType
+if (ModelingType<>NULL){
+   ModelingTypeName=ModelingType.Name 
+}
+
+if (ModelingTypeName == "" and CopyFromObject <> NULL){
+    ModelingType=CopyFromObject.ModelerType
+    if (ModelingType<>NULL) {
+	   ModelingTypeName=ModelingType.Name 
+	}   
+}
+
+VUsage=""    
+if (ThisObject->HasAttribute("V_usage") == true) {
+	VUsage= ThisObject->GetAttributeString("V_usage")
+} 
+
+if (VUsage == "" and Parameters->HasAttribute("V_usage") == true) {
+	VUsage= Parameters->GetAttributeString("V_usage")    
+}
+
+if (VUsage == "" and CopyFromObject <> NULL){
+    if (CopyFromObject->HasAttribute("V_usage") == true) {
+	   VUsage= CopyFromObject->GetAttributeString("V_usage") 
+	}   
+}
+
+/*former name defined?*/
+VNameWas=""
+if  (ThisObject->HasAttribute("V_Name") == true and IsRootFamilyItem == false) { /*TEMPLATE CLONING and ComponentsFamilyNaming sub-ref */ 
+      VNameWas=ThisObject->GetAttributeString("V_Name")
+}
+
+if ( (VNameWas == "") and (CopyFromObject <> NULL)) {
+   if (CopyFromObject->HasAttribute("V_Name") == true){
+	   VNameWas=CopyFromObject->GetAttributeString("V_Name")
+   }
+}
+/* tree naming - default value: tree naming from -> tree naming to */
+ItemName=""
+if ( IsRootFamilyItem == true and Parameters->HasAttribute("ItemName") == true ) {  /* ComponentsFamilyNaming Root only*/
+  ItemName = Parameters.GetAttributeString("ItemName")
+  VNameWas=ItemName   /*by pass already set V_Name already defaulty set, but wrongly by KW ComponentsFamily*/
+}
+
+if ( Parameters->HasAttribute("iFileId") == true ) {  /* DataExchangeImport */
+  ItemName = Parameters.GetAttributeString("iFileId")
+}
+
+if ( Parameters->HasAttribute("FileName") == true ) {  /* FBDImport */
+  ItemName = Parameters.GetAttributeString("FileName")
+}
+/*new 207: take in accound V5 product properties in case of Import */
+if (Parameters->HasAttribute("NativeV5Properties") == true) { /* FBDImport CATProduct & CATPart */
+    Set NativeV5PropFeat = Parameters->GetAttributeObject("NativeV5Properties")
+    /* internal components have the same FileName but different PartNumber */
+    if (NativeV5PropFeat->HasAttribute("PartNumber") == true)
+    {
+        ItemName = NativeV5PropFeat->GetAttributeString("PartNumber")
+        VNameWas = NativeV5PropFeat->GetAttributeString("PartNumber")
+    }
+    if (NativeV5PropFeat->HasAttribute("DescriptionRef") == true)
+    {
+        Description = NativeV5PropFeat->GetAttributeString("DescriptionRef")
+    }
+}
+if (VNameWas=="") { VNameWas=ItemName }
+
+if ( (VNameWas == "") and (CopyFromObject <> NULL)) { /* new 207 (import default name = VPM External id) */
+   if (CopyFromObject->HasAttribute("PLM_ExternalID") == true){
+	   VNameWas=CopyFromObject->GetAttributeString("PLM_ExternalID")
+   }
+}
+/*new V6R2014x services for typing V2: requires Apps to deliver the property Abbreviation in the metadata*/ 
+AbbreviatedBaseTypeName=ModelingTypeName
+/* RetrieveNamingParameters(ModelingTypeName,NamingTypePrefix,SiteAffix,NamingTypeSuffix) */
+RetrieveNamingParametersWithSeparator(ModelingTypeName,NamingTypePrefix,SiteAffix,NamingTypeSuffix,Separator,AbbreviatedBaseTypeName)
+if ((AbbreviatedBaseTypeName == "") or (AbbreviatedBaseTypeName == NULL)) {
+	AbbreviatedBaseTypeName=ModelingTypeName
+}
+/* Management of Common Abbreviation requires the ModelingTypeName to be rerouted*/
+if (ModelingTypeName <> AbbreviatedBaseTypeName) { 
+    Trace (1, "ENONT_PLMReference_BLInitialization, BaseType Abreviation Used for Type ", ModelingTypeName, " requires base numbering reroute to type ", AbbreviatedBaseTypeName)
+	/*Change of Alignement for subtype to avoid any data naming conflict with earlier naming principle*/
+	NumberAlignment=NumberAlignment+1 
+   /* AbbreviatedBaseTypeName=ModelingTypeName */
+}
+/*Naming Prefix is Manadatory */
+if ( (NamingTypePrefix == "") or (NamingTypePrefix == NULL) ){
+      Trace (1, "ENONT_VPMReference_BLInitialization, Error No prefix for Type ", ModelingTypeName  )
+	  NamingTypePrefix="$$$"
+} 
+          
+		  /* Retrieve default NLS prefix for the title */ 
+		
+/*find the default title for the type (RACE V2 will use the NLS of the type - somehow different from RACE V1) which is good mitigation as long as it is only default title*/
+TypeTitle=ModelingType.UserName
+if ( (TypeTitle == "") or (TypeTitle == NULL) ) {
+   TypeTitle="$$$"
+}
+          /* Apply business logic  for Creation */ 
+
+
+/*requires STCusto KW package with MyNamingCustomFileName when supported*/ 
+if (IsCreatingNewObject==true) {
+    /* Numbering on AbbreviatedBaseType*/
+	STAutoNumbers(AbbreviatedBaseTypeName, NumberAlignment, IDNumber, IDVNumber)
+    Trace (1, "ENONT_PLMReference_BLInitialization, Allocated Numbers for type ", AbbreviatedBaseTypeName, " are ID=", IDNumber,", VN=", IDVNumber )
+}
+/*set description but do not cover unseting description */
+if ( Description <> "" and ThisObject->HasAttribute("V_description") == true) {
+   DescriptionSize=Description.Length()
+   if (DescriptionSize>256) {
+	Description=Description.Extract(0,252)+ "..."
+   }
+
+   ThisObject->SetAttributeString("V_description",Description)
+}
+
+/* object naming setup*/
+VName=""
+bSuffix = false
+UserSuffix = ""
+iLength = 0
+
+iLength = UserPrefix.Length()
+sFirstChar = UserPrefix.Extract(0,1)
+sAllowedDigit = "0123456789"
+if(iLength == 3 and sFirstChar == "E")
+{
+	sFirstChar = UserPrefix.Extract(1,1)
+	sSecondChar = UserPrefix.Extract(2, 1)
+	if((sAllowedDigit.Search(sFirstChar) <> -1) and (sAllowedDigit.Search(sSecondChar) <> -1))
+	{
+		bSuffix = true
+	}
+}
+
+if(bSuffix)
+{
+	UserSuffix = UserPrefix
+}
+if ((VNameWas =="") or (VNameWas==NULL))
+{
+	/*VName=UserPrefix+TypeTitle+ToString(Inc)*/
+	if(bSuffix)
+	{
+		VName=TypeTitle+IDVNumber+UserSuffix
+	}
+	else
+	{
+		  VName=UserPrefix+TypeTitle+IDVNumber
+	}
+	
+	Trace(1, "T00284-TMDC00000-00024- VName is : #", VName )
+}
+else
+{	
+	/*case cloning, import, partfamily, ....*/
+	
+	Trace(2, "bSuffix: # UserPrefix:#", bSuffix,UserPrefix)
+	yInt=UserPrefix.Search("YPP",0 ,True)
+	Trace(2, "T00292-TMDC00000-00025- yInt is : #", yInt)
+
+	If(yInt ==-1)
+	{ 	
+		Trace(2, "bSuffix: # UserPrefix:#", bSuffix,UserPrefix)
+		if(bSuffix)
+		{
+			VName=VNameWas+UserSuffix
+		}
+		else
+		{
+			if ((UserPrefix <>"")) 
+			{
+				VName=UserPrefix+VNameWas /*OOTB: may be an error for partfamily where itemname is already set in target object... */
+			} else {
+				Trace(3, "No prefix")
+			}
+		}
+			
+		Trace(2, "T00298-TMDC00000-00026- VName is : #", VName )
+	}
+	else
+	{
+		ylength=UserPrefix.Length()
+		startIndex = yInt+3
+		endIndex = ylength - 3
+		ExtVName=UserPrefix.Extract(startIndex, endIndex)
+		VName=ExtVName
+		Trace(1, "T00305-TMDC00000-00027- VName is : #", VName )
+	}
+}
+
+///* object naming setup*/
+//VName=""
+//
+//if ((VNameWas =="") or (VNameWas==NULL)) {
+//   /*VName=UserPrefix+TypeTitle+ToString(Inc)*/
+//   VName=UserPrefix+TypeTitle+IDVNumber
+//}
+//else { 
+//   /*case cloning, import, partfamily, ....*/
+//   VName=UserPrefix+VNameWas
+//   /*may be an error for partfamily where itemname is already set in target object... */
+//}
+
+if ( ThisObject->HasAttribute("V_Name") == true ) {
+   NameSize=VName.Length()
+   if (NameSize>100) {
+	VName=VName.Extract(0,96)+ "..."
+   }
+   ThisObject->SetAttributeString("V_Name",VName)
+}
+
+/*identification setup*/
+if (IsCreatingNewObject == true) {
+	/* define P/S depending on project:  kind of standard or not */ 
+	IDType=""
+	if ( STStandardProject(ProjectUsage) == true ) {
+		IDType="s"+NamingTypePrefix
+	}
+	else {
+		IDType=NamingTypePrefix
+	}
+
+	ID=IDType
+    if (SiteAffix<>"") ID=ID+Separator+SiteAffix+Separator
+	
+	ID=ID+IDNumber
+
+	if (NamingTypeSuffix<>"") ID=ID+Separator+NamingTypeSuffix
+
+    /* blocking evolution??? if (Parameters->GetAttributeString("OperationDetail")  == "NewEvolution") {ID="" } */
+
+	if ( ThisObject->HasAttribute("PLM_ExternalID") == true ) {
+	    ThisObject->SetAttributeString("PLM_ExternalID",ID)
+	}
+
+	if (CopyFromObject <> NULL) { /* set id cloning chain */
+		if (CopyFromObject->HasAttribute("PLM_ExternalID") == true){
+			VNameWas=CopyFromObject->GetAttributeString("PLM_ExternalID")
+		}
+
+        if (CopyFromObject->HasAttribute("revision") == true ) { 
+            ItemName=CopyFromObject->GetAttributeString("revision")
+            VNameWas=VNameWas + " " + ItemName
+        }
+
+		if ( ThisObject->HasAttribute("V_fromExternalID") == true ) {
+			ThisObject->SetAttributeString("V_fromExternalID",VNameWas)
+		}
+	}   
+}
+
+/* ------------------------------------------------------------------------------------------------ */
+/* Custo code     */
+/* ------------------------------------------------------------------------------------------------ */
+
+If(Parameters->GetAttributeString("OperationId") <> "New")
+{
+	if ((VName =="") or (VName==NULL)) {
+		if (ThisObject->HasAttribute("PLM_ExternalID") == true)
+		{
+			VName=ThisObject->GetAttributeString("PLM_ExternalID")
+			ThisObject->SetAttributeString("V_Name",VName)
+
+		}
+	}
+}
+Trace(2, "V_Name: #", ThisObject.GetAttributeString("V_Name"))
+Trace(1, "Attributes Initialization ==>")

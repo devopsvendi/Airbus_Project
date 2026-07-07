@@ -1,74 +1,22 @@
-plugins {
-    id 'java'
-    id 'application'
-}
-
-group = 'com.airbus.project'
-version = '1.0.0'
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation 'com.google.guava:guava:28.1-jre'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
-}
-
-application {
-    mainClassName = 'simple.gradle.java.app.App'
-}
-
-test {
-    useJUnitPlatform()
-}
-
-// Task 1: Environment verification
-tasks.register('verifySetup') {
-    group = 'Verification'
-    doLast {
-        println '========================================='
-        println ' SUCCESS: Jenkins/Local Wrapper Works! '
-        println " Java Version: ${System.getProperty('java.version')}"
-        println '========================================='
-    }
-}
-
-// Task 2: Build the source distribution ZIP
-tasks.register('packageSrcToZip', Zip) {
-    group = 'Distribution'
-    description = 'Packages src directory and gradle files into a ZIP archive'
-    
-    archiveFileName = 'gradle-java-app-src.zip'
-    destinationDirectory = layout.buildDirectory.dir('distributions')
-
-    from('src') {
-        into 'src'
-    }
-    from('.') {
-        include 'build.gradle'
-        include 'settings.gradle'
-        include 'gradlew'
-        include 'gradlew.bat'
-        include 'gradle/wrapper/**'
-    }
-}
-
-// Task 3: Build the NuGet package (.nupkg)
+// 3. Task to package your source files into a NuGet Package (.nupkg)
 tasks.register('packageToNuget', Zip) {
     group = 'Distribution'
     description = 'Generates a NuGet package (.nupkg) containing the src assets'
-    
+
+    // Setting the file extension to .nupkg instead of .zip
     archiveExtension = 'nupkg'
     archiveBaseName = 'SimpleGradleJavaApp'
     archiveVersion = '1.0.0'
+    
     destinationDirectory = layout.buildDirectory.dir('distributions')
 
+    // Copy your src scripts into the 'content' or 'tools' directory inside the NuGet package
     from('src') {
         into 'content/src'
     }
 
+    // NuGet packages require a .nuspec XML file inside the root of the package.
+    // This dynamically creates a baseline nuspec manifest file during execution.
     doFirst {
         def nuspecFile = file("${buildDir}/SimpleGradleJavaApp.nuspec")
         nuspecFile.parentFile.mkdirs()
@@ -83,5 +31,7 @@ tasks.register('packageToNuget', Zip) {
 </package>
 """
     }
+
+    // Include the generated nuspec in the root layout of the .nupkg file
     from("${buildDir}/SimpleGradleJavaApp.nuspec")
 }

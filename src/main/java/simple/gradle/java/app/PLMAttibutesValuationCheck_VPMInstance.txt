@@ -1,0 +1,36 @@
+/* Rule created by NG86254 22/06/2021 */ 
+/* Input Parameters
+	ThisObject: 	VPMInstance
+	Parameters: 	RuleContext
+*/
+
+let sDesc(String)
+let lErrorlist, lErrorMessagelist(List)
+
+Validation = true  // default value
+
+Trace(1, "==>  Attributes valuation check - VPMInstance")
+Trace(2,"ThisObject Name: #", ThisObject.Name)
+
+set lErrorlist = Parameters.GetAttributeObject("ErrorAttributes")
+set lErrorMessagelist = Parameters.GetAttributeObject("ErrorMessages")
+
+if (ThisObject.HasAttribute("V_description"))
+{
+	sDesc = ThisObject.GetAttributeString("V_description")
+	Trace(2, "sDesc: #", sDesc)
+		
+	if (sDesc == "")
+	{
+		Validation = false
+		lErrorMessagelist.Append("Description should not be empty")
+		lErrorlist.Append("Description")
+	}
+	
+	if (Validation == false) 
+	{
+		Parameters.SetAttributeObject("ErrorMessages",lErrorMessagelist)
+		Parameters.SetAttributeObject("ErrorAttributes",lErrorlist)
+	}
+}
+Trace(1, "Attributes valuation check ==> #", Validation)
