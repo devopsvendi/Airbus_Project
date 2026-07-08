@@ -20,6 +20,30 @@ Validation = true
 		lErrorMessages.Append("Description is empty. Please fill the attribute.")
 	}
 	
+	// --- New Business Logic for VversionComment ---
+	Let sVersionComment(String)
+	sVersionComment = ThisObject.GetAttributeString("VversionComment")
+
+	// 1. Business Logic must trigger to set VversionComment to 'Test Value' by default if it's empty
+	if (sVersionComment == "")
+	{
+		ThisObject.SetAttributeString("VversionComment", "Test Value")
+		sVersionComment = "Test Value" // Update local variable for subsequent checks
+	}
+	
+	// 2. Upon user edit, enforce a minimum character limit of 20.
+	// This validation applies if the attribute value is NOT the system-set default 'Test Value',
+	// AND its length is less than 20 characters. The default 'Test Value' itself is an allowed exception.
+	if (sVersionComment != "Test Value" && sVersionComment.Length() < 20)
+	{
+		lErrorAttributes.Append("VversionComment")
+		lErrorMessages.Append("Version comment must be at least 20 characters long. Current length: " + sVersionComment.Length())
+		// As per requirement: "stop execution and prompt the user with an error using the Message or Notify keyword"
+		Message("Validation Error: The Version Comment must be at least 20 characters long. Current length: " + sVersionComment.Length())
+		// Validation will be set to false by the common error block below
+	}
+	// --- End New Business Logic ---
+	
 	if(lErrorAttributes.Size() > 0)
 	{
 		Validation = false
