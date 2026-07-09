@@ -1,2 +1,2 @@
-[Thu Jul  9 11:58:09 2026] Deployment Log:
-FAILURE: Agent 6 deployment failed: Gradle ZIP archive not found at: C:/ProgramData/Jenkins/.jenkins/workspace/Gradle_project/build/distributions/Gradle_project.zip
+[Thu Jul  9 12:01:28 2026] Deployment Log:
+FAILURE: Agent 6 deployment failed: Gradle ZIP archive not found at: C:/ProgramData/Jenkins/.jenkins/workspace/Gradle_project/build/libs/Gradle_project.zip
