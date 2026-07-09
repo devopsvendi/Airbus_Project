@@ -1,5 +1,2 @@
-[Thu Jul  9 11:55:55 2026] Ansible Deployment Log:
-
-Errors:
-'ansible-playbook' is not recognized as an internal or external command,
-operable program or batch file.
+[Thu Jul  9 11:58:09 2026] Deployment Log:
+FAILURE: Agent 6 deployment failed: Gradle ZIP archive not found at: C:/ProgramData/Jenkins/.jenkins/workspace/Gradle_project/build/distributions/Gradle_project.zip

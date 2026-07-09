@@ -4,7 +4,7 @@ import zipfile
 from state import EKLState
 
 DEPLOY_LOG = "knowledge-base/output/deployment.log"
-ZIP_PATH = "C:/ProgramData/Jenkins/.jenkins/workspace/Gradle_project/build/distributions/Gradle_project.zip"
+ZIP_PATH = "C:/ProgramData/Jenkins/.jenkins/workspace/Gradle_project/build/libs/Gradle_project.zip"
 DEPLOY_TO = "C:/EKL-Project/production-deployment"
 
 def run(state: EKLState) -> EKLState:
