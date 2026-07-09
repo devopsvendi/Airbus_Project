@@ -1,2 +1,5 @@
-[Thu Jul  9 09:40:44 2026] Package Target Asset: knowledge-base/output/packages\EKL-25.nupkg
-[Thu Jul  9 09:40:44 2026] Deployment Status: SUCCESS
+[Thu Jul  9 11:55:55 2026] Ansible Deployment Log:
+
+Errors:
+'ansible-playbook' is not recognized as an internal or external command,
+operable program or batch file.
