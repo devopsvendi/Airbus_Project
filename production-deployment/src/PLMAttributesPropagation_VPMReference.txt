@@ -1,0 +1,23 @@
+
+/* Input Parameters:
+	ThisObject 	VPMReference
+	Parameters	RuleContext
+*/
+
+Let sPropagationMode, sEditAttributeId(String)
+Let pBusinessType(ValuePointer)
+Let lBusinessType(List)
+
+Trace(1, "==> Attributes valuation propagation - VPMReference")
+Trace(2, "ThisObject Name: #", ThisObject.Name)
+
+sPropagationMode = Parameters.GetAttributeString("PropagationMode")
+sEditAttributeId = Parameters.GetAttributeString("EditAttributeId")
+Trace(2, "Propagation Mode: #", sPropagationMode)
+Trace(2, "Edit Attribute Id: #", sEditAttributeId)
+if(sPropagationMode == "Edition")
+{
+	ThisObject.SetAttributeString("V_Name", "PLM_ExternalID")
+}
+
+Trace(1, "Attributes valuation propagation ==>")

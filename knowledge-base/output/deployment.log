@@ -1,2 +1,3 @@
-[Thu Jul  9 12:01:28 2026] Deployment Log:
-FAILURE: Agent 6 deployment failed: Gradle ZIP archive not found at: C:/ProgramData/Jenkins/.jenkins/workspace/Gradle_project/build/libs/Gradle_project.zip
+[Thu Jul  9 12:14:23 2026] Deployment Log:
+SUCCESS: Package extracted to C:/EKL-Project/production-deployment
+Source Zip: C:/ProgramData/Jenkins/.jenkins/workspace/Gradle_project/build/distributions/gradle-java-app-src.zip

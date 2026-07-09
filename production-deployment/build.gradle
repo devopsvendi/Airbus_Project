@@ -1,0 +1,87 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.airbus.project'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.guava:guava:28.1-jre'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+}
+
+application {
+    mainClassName = 'simple.gradle.java.app.App'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Task 1: Environment verification
+tasks.register('verifySetup') {
+    group = 'Verification'
+    doLast {
+        println '========================================='
+        println ' SUCCESS: Jenkins/Local Wrapper Works! '
+        println " Java Version: ${System.getProperty('java.version')}"
+        println '========================================='
+    }
+}
+
+// Task 2: Build the source distribution ZIP
+tasks.register('packageSrcToZip', Zip) {
+    group = 'Distribution'
+    description = 'Packages src directory and gradle files into a ZIP archive'
+    
+    archiveFileName = 'gradle-java-app-src.zip'
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+
+    from('src') {
+        into 'src'
+    }
+    from('.') {
+        include 'build.gradle'
+        include 'settings.gradle'
+        include 'gradlew'
+        include 'gradlew.bat'
+        include 'gradle/wrapper/**'
+    }
+}
+
+// Task 3: Build the NuGet package (.nupkg)
+tasks.register('packageToNuget', Zip) {
+    group = 'Distribution'
+    description = 'Generates a NuGet package (.nupkg) containing the src assets'
+    
+    archiveExtension = 'nupkg'
+    archiveBaseName = 'SimpleGradleJavaApp'
+    archiveVersion = '1.0.0'
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+
+    from('src') {
+        into 'content/src'
+    }
+
+    doFirst {
+        def nuspecFile = file("${buildDir}/SimpleGradleJavaApp.nuspec")
+        nuspecFile.parentFile.mkdirs()
+        nuspecFile.text = """<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>SimpleGradleJavaApp</id>
+        <version>1.0.0</version>
+        <authors>DevOpsTeam</authors>
+        <description>PLM Source Scripts Distribution Package</description>
+    </metadata>
+</package>
+"""
+    }
+    from("${buildDir}/SimpleGradleJavaApp.nuspec")
+}
