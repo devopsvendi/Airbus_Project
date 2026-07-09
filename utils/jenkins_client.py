@@ -5,7 +5,7 @@ class JenkinsClientWrapper:
     def __init__(self):
         self.url = os.getenv("JENKINS_URL", "http://localhost:8080")
         self.user = os.getenv("JENKINS_USER", "admin")
-        self.token = os.getenv("JENKINS_TOKEN", "password") # Change to your Jenkins password or token
+        self.token = os.getenv("JENKINS_TOKEN", "11de3b90327c2f62190f4f78275b398d89")
         self.server = jenkins.Jenkins(self.url, username=self.user, password=self.token)
 
     def trigger_build(self, job_name, parameters):
