@@ -1,0 +1,7 @@
+---
+- name: Deploy Gradle ZIP Package via Ansible
+  hosts: localhost
+  vars:
+    zip_path: "C:/ProgramData/Jenkins/.jenkins/workspace/Gradle_project/build/distributions/gradle-java-app-src.zip"
+    deploy_to: "C:/EKL-Project/production-deployment"
+
