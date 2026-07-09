@@ -1,0 +1,30 @@
+/* Input Parameters
+	ThisObject	VPMReference
+	Parameters	RuleContext
+	Validation	Boolean
+*/
+
+Trace(1, "==> Attributes valuation check - VPMReference ")
+Validation = true
+
+
+	Let lErrorAttributes, lErrorMessages(List)
+	
+	Let sType(String)
+		set lErrorAttributes = Parameters->GetAttributeObject("ErrorAttributes")
+	set lErrorMessages = Parameters->GetAttributeObject("ErrorMessages")
+	
+	if(ThisObject.GetAttributeString("V_description") == "")
+	{
+		lErrorAttributes.Append("V_description")
+		lErrorMessages.Append("Description is empty. Please fill the attribute.")
+	}
+	
+	if(lErrorAttributes.Size() > 0)
+	{
+		Validation = false
+		Parameters->SetAttributeObject("ErrorAttributes",lErrorAttributes)
+		Parameters->SetAttributeObject("ErrorMessages",lErrorMessages)
+	}
+
+Trace(1, "Attributes valuation check  ==> #", Validation)

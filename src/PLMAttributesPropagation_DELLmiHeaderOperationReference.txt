@@ -1,0 +1,19 @@
+ 
+Trace(1, "==>  Attributes valuation propagation - DELLmiHeaderOperationReference")
+
+Let strPropagationMode(String)
+strPropagationMode= Parameters->GetAttributeString("PropagationMode")
+if (strPropagationMode == "Valuation") {
+	Let EditAttributeId(String)
+	EditAttributeId= Parameters->GetAttributeString("EditAttributeId")
+	Trace(2, "EditAttributeId: #",EditAttributeId)
+	if (EditAttributeId == "V_Name" )    {
+		ThisObject.SetAttributeString("AttributeModifiedTitle","V_Name")
+		Trace(1,"Attribute Modified Value: #",ThisObject.GetAttributeString("AttributeModifiedTitle"))
+	}
+	if (EditAttributeId == "V_description" )    {
+		ThisObject.SetAttributeString("AttributeModifiedDescription","true")
+		Trace(1,"Attribute Modified Description Value: #",ThisObject.GetAttributeString("AttributeModifiedDescription"))
+	}
+}
+Trace(1, "Attributes valuation propagation ==>")
